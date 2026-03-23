@@ -25,6 +25,13 @@ public class PixelCube : MonoBehaviour
 
         GetComponent<Rigidbody>().isKinematic = true;
         GetComponent<Collider>().enabled = false;
-        transform.DOScale(0, 0.5f).OnComplete(() => Destroy(gameObject));
+        transform.DOScale(0, 0.5f).OnComplete(() => 
+        {
+            if(CoinManager.HasInstance) //Check coin
+            {
+                CoinManager.Instance.AddCoin(1); // +1 when 1 cube Destroy
+            }
+            Destroy(gameObject);
+        });
     }
 }

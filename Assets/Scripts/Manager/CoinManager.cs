@@ -6,7 +6,8 @@ public class CoinManager : BaseManager<CoinManager>
     [SerializeField] private TMP_Text coinText;
     [SerializeField] private int maxCoins = 9999999; // Max coin
     [SerializeField] private string maxText = "Max Coin";
-    private int currentCoins = 0;
+    public int currentCoins = 0;
+    public int CurrentCoins => currentCoins;
     private const int DISPLAY_DIGITS = 7; // Always display 7 digits
 
     #region Singleton Manager

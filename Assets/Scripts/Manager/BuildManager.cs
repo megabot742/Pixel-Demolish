@@ -12,7 +12,7 @@ public class BuildManager : BaseManager<BuildManager>
 
     [Header("UI Build Prompt")]
     [SerializeField] private GameObject buildPromptPrefab;
-    
+
     private int currentBuildCost;
     public int CurrentBuildCost => currentBuildCost;
     private List<PointBuild> pointBuilds = new List<PointBuild>();
@@ -21,15 +21,31 @@ public class BuildManager : BaseManager<BuildManager>
     protected override void Awake()
     {
         base.Awake();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded; // tránh leak
     }
     #endregion
 
     private void Start()
     {
-        FindAllPointBuilds();
         currentBuildCost = minCoin;
-        SpawnInitialSaws();
-        SpawnBuildPromptsForEmptyPoints();
+    }
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Chỉ xử lý khi vào các Level
+        if (scene.name == "Level 1" || scene.name == "Level 2" ||
+            scene.name == "Level 3" || scene.name == "Level 4" || scene.name == "Level 5")
+        {
+            Debug.Log($"[BuildManager] Scene {scene.name} loaded → Re-initialize PointBuilds");
+
+            currentBuildCost = minCoin;           // Reset giá build mỗi level (bạn có thể bỏ dòng này nếu muốn giá tăng mãi)
+            FindAllPointBuilds();
+            SpawnInitialSaws();
+            SpawnBuildPromptsForEmptyPoints();
+        }
     }
 
     private void FindAllPointBuilds()
@@ -88,14 +104,36 @@ public class BuildManager : BaseManager<BuildManager>
 
         if (!isFree)
         {
+            //Not enough coins
             if (!CoinManager.HasInstance || CoinManager.Instance.CurrentCoins < currentBuildCost)
             {
-                Debug.LogWarning($"[BuildManager] Not enough coins! Need {currentBuildCost}, currently available {CoinManager.Instance.CurrentCoins}");
+
+                string notEnoughMsg = $"Not enough coins!\nNeed {currentBuildCost}, have {CoinManager.Instance.CurrentCoins}";
+
+                if (UIManager.HasInstance && UIManager.Instance.hUDPanel != null)
+                {
+                    UIManager.Instance.hUDPanel.ShowNotification(notEnoughMsg, Color.magenta, 1);
+                }
+                else
+                {
+                    Debug.LogWarning(notEnoughMsg);
+                }
                 return;
             }
 
             CoinManager.Instance.SubtractCoin(currentBuildCost);
-            Debug.Log($"[BuildManager] Build Saw successfully at {point.name}. Cost: {currentBuildCost} | Next cost: {currentBuildCost + nextCoin}");
+
+            //Build Saw successfully
+            string successMsg = $"Build Saw successfully!\nNext cost: {currentBuildCost + nextCoin}";
+
+            if (UIManager.HasInstance && UIManager.Instance.hUDPanel != null)
+            {
+                UIManager.Instance.hUDPanel.ShowNotification(successMsg, Color.green, 1.8f);
+            }
+            else
+            {
+                Debug.Log(successMsg);
+            }
             currentBuildCost += nextCoin;
         }
         else
@@ -109,7 +147,7 @@ public class BuildManager : BaseManager<BuildManager>
             return;
         }
 
-        // Spawn làm con của PointBuild
+        // Spawn saw child in PointBuild
         GameObject newSaw = Instantiate(sawPrefab, point.transform);
         newSaw.transform.localPosition = Vector3.zero;
         newSaw.transform.localRotation = Quaternion.identity;
@@ -119,9 +157,6 @@ public class BuildManager : BaseManager<BuildManager>
         Debug.Log($"[BuildManager] Đã spawn Saw tại {point.name}");
     }
 
-    /// <summary>
-    /// Gọi từ UI / script khác để build Saw (có trừ coin)
-    /// </summary>
     public void BuildSaw(PointBuild point)
     {
         if (point == null) return;

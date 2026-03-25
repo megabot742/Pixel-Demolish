@@ -1,38 +1,102 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class SpawnManager : MonoBehaviour
+public class SpawnManager : BaseManager<SpawnManager>
 {
     [Header("Spawn Setting")]
     [SerializeField] private List<GameObject> entityPrefabs = new List<GameObject>();
-    [SerializeField] private float spawnCountDown = 7f; //default 3 second
+    [SerializeField] private float spawnCountDown = 7f; //default 7 second
     [SerializeField] private Transform spawnPoint;
-    [SerializeField] private float randomRotationRange = 80f; // ±30 độ là đẹp nhất
+    [SerializeField] private float randomRotationRange = 80f; // ±80
+    [SerializeField] private bool isSpawning = true;
 
-    private void Start()
+    private Coroutine spawnCoroutine;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        StopSpawning();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Menu")
+        {
+            StopSpawning();//Stop spawn
+            spawnPoint = null;
+        }
+        else if (IsLevelScene(scene.name))
+        {
+            FindSpawnPoint();
+            StartSpawning();
+        }
+    }
+    private bool IsLevelScene(string sceneName)
+    {
+        return sceneName.StartsWith("Level ");
+    }
+    private void FindSpawnPoint()
+    {
+        GameObject spawnObj = GameObject.FindWithTag("SpawnPoint");
+
+        if (spawnObj != null)
+        {
+            spawnPoint = spawnObj.transform;
+            Debug.Log($"[SpawnManager] Tìm thấy SpawnPoint tại {spawnPoint.position} trong scene {SceneManager.GetActiveScene().name}");
+        }
+        else
+        {
+            spawnPoint = transform; // fallback: dùng vị trí của chính SpawnManager
+            Debug.LogWarning("[SpawnManager] Không tìm thấy GameObject có tag 'SpawnPoint'! Sử dụng vị trí mặc định của SpawnManager.");
+        }
+    }
+    public void StartSpawning()
     {
         if (entityPrefabs.Count == 0)
         {
-            Debug.LogError("SpawnManager: Not Enity Prefab");
+            Debug.LogError("[SpawnManager] Chưa gán entityPrefabs!");
             return;
         }
 
-        if (spawnPoint == null)
-        {
-            Debug.LogWarning("SpawnManager: Unassigned spawnPoint will use SpawnManager's location instead");
-            spawnPoint = transform;
-        }
+        StopSpawning(); // Dừng coroutine cũ trước
 
-        //Spawn
-        StartCoroutine(SpawnRoutine());
+        isSpawning = true;
+        spawnCoroutine = StartCoroutine(SpawnRoutine());
+        Debug.Log("[SpawnManager] Bắt đầu spawn Entity");
+    }
+
+    public void StopSpawning()
+    {
+        isSpawning = false;
+        if (spawnCoroutine != null)
+        {
+            StopCoroutine(spawnCoroutine);
+            spawnCoroutine = null;
+        }
     }
 
     private IEnumerator SpawnRoutine()
     {
-        while (true)
+        while (isSpawning)
         {
-            SpawnOneEntity();
+            if (spawnPoint != null)        // Kiểm tra an toàn
+            {
+                SpawnOneEntity();
+            }
+            else
+            {
+                Debug.LogWarning("[SpawnManager] spawnPoint bị null → Dừng spawn");
+                yield break;
+            }
+
             yield return new WaitForSeconds(spawnCountDown);
         }
     }

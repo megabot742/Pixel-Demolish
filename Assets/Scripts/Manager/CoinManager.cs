@@ -1,9 +1,10 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CoinManager : BaseManager<CoinManager>
 {
-    [SerializeField] private TMP_Text coinText;
     [SerializeField] private int maxCoins = 9999999; // Max coin
     [SerializeField] private string maxText = "Max Coin";
     public int currentCoins = 0;
@@ -14,6 +15,21 @@ public class CoinManager : BaseManager<CoinManager>
     protected override void Awake()
     {
         base.Awake();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Chỉ reset coin khi vào Level (không reset ở Menu)
+        if (scene.name == "Level 1" || scene.name == "Level 2" || 
+            scene.name == "Level 3" || scene.name == "Level 4" || scene.name == "Level 5")
+        {
+            ResetCoins();
+            Debug.Log($"[CoinManager] Scene {scene.name} loaded → Reset coin to 0");
+        }
     }
     #endregion
     #region Handle Coin
@@ -35,15 +51,18 @@ public class CoinManager : BaseManager<CoinManager>
     }
     private void UpdateUI()
     {
-        if (coinText == null) return;
+        if(UIManager.HasInstance)
+        {
+            if (UIManager.Instance.hUDPanel.coinTxt == null) return;
 
-        if (currentCoins >= maxCoins)
-        {
-            coinText.text = maxText;
-        }
-        else
-        {
-            coinText.text = currentCoins.ToString($"D{DISPLAY_DIGITS}");
+            if (currentCoins >= maxCoins)
+            {
+                UIManager.Instance.hUDPanel.coinTxt.text = maxText;
+            }
+            else
+            {
+                UIManager.Instance.hUDPanel.coinTxt.text = currentCoins.ToString($"D{DISPLAY_DIGITS}");
+            }
         }
     }
     // Reset coin (dùng khi restart level)

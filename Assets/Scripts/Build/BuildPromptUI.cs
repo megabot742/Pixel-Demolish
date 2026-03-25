@@ -9,7 +9,7 @@ public class BuildPromptUI : MonoBehaviour
     [SerializeField] private Button buildButton;
     [SerializeField] private TMP_Text costText;
 
-    private PointBuild _targetPoint;
+    private PointBuild targetPoint;
     private void Awake()
     {
         // Automatically assign Event Camera if not available (very important for World Space)
@@ -21,14 +21,14 @@ public class BuildPromptUI : MonoBehaviour
     }
     public void Setup(PointBuild targetPoint)
     {
-        _targetPoint = targetPoint;
+        this.targetPoint = targetPoint;
         buildButton.onClick.AddListener(OnBuildClicked);
     }
 
     private void OnBuildClicked()
     {
-        if (_targetPoint == null || !BuildManager.HasInstance) return;
-        BuildManager.Instance.BuildSaw(_targetPoint);
+        if (targetPoint == null || !BuildManager.HasInstance) return;
+        BuildManager.Instance.BuildSaw(targetPoint);
     }
 
     private void LateUpdate()

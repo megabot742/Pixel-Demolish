@@ -31,6 +31,10 @@ public class PixelCube : MonoBehaviour
             {
                 CoinManager.Instance.AddCoin(1); // +1 when 1 cube Destroy
             }
+            if (ResultManager.HasInstance)
+            {
+                ResultManager.Instance.AddExp(1);
+            }
             Destroy(gameObject);
         });
     }

@@ -28,6 +28,6 @@ Casual Pixel Destruction game
   - CoinManager: quản lí xu ở các màn chơi, tăng lên khi Gear phá hủy PixelCube, giảm khi xây dựng Saw
   - Resualt: quản lí exp ở từng màng chơi, tăng lên khi Gear phá hủy PixelCube
 
-  # Những cải thiện nếu có thêm thời gian
+# Những cải thiện nếu có thêm thời gian
   - Thêm màn, thêm Enity
   - Làm tool giúp tạo Enity nhanh hơn

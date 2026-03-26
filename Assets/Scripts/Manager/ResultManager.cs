@@ -11,7 +11,7 @@ public class ResultManager : BaseManager<ResultManager>
     //[SerializeField] private ResultPanel resultPanel;
 
     [Header("EXP Settings")]
-    [SerializeField] private int[] levelExpRequirements = { 500, 700, 900, 1200, 1500 }; // Level 1 đến 5
+    [SerializeField] private int[] levelExpRequirements = { 500, 700, 900, 1200, 1500 }; // Level 1 -> 5
 
     private int currentExp = 0;
     private int currentLevel = 1;
@@ -43,30 +43,30 @@ public class ResultManager : BaseManager<ResultManager>
             {
                 UIManager.Instance.resultPanel.gameObject.SetActive(false);
             }
-            // Ẩn ResultPanel khi vào level mới
+            // Hide ResultPanel when entering a new level
             if (UIManager.HasInstance && UIManager.Instance.hUDPanel != null)
             {
                 UIManager.Instance.hUDPanel.RefreshExpUI();
             }
 
-            Debug.Log($"[ResultManager] Level {currentLevel} loaded. Need {GetRequiredExp()} EXP to complete.");
+            //Debug.Log($"[ResultManager] Level {currentLevel} loaded. Need {GetRequiredExp()} EXP to complete.");
         }
     }
-
-    // Gọi mỗi khi destroy 1 PixelCube
+    #region Handle
+    // Calculate EXP
     public void AddExp(int amount = 1)
     {
         if (levelCompleted) return;
 
         currentExp += amount;
 
-        // Cập nhật UI trên HUD (nếu có)
+        // Update UI in HUD
         if (UIManager.HasInstance && UIManager.Instance.hUDPanel != null)
         {
             UIManager.Instance.hUDPanel.UpdateExpUI(currentExp, GetRequiredExp());
         }
 
-        // Kiểm tra đủ EXP chưa
+        // Check if you have enough EXP
         if (currentExp >= GetRequiredExp())
         {
             CompleteLevel();
@@ -86,7 +86,7 @@ public class ResultManager : BaseManager<ResultManager>
     {
         levelCompleted = true;
 
-        // Dừng SpawnManager
+        // Stop SpawnManager
         if (SpawnManager.HasInstance)
             SpawnManager.Instance.StopSpawning();
 
@@ -94,25 +94,23 @@ public class ResultManager : BaseManager<ResultManager>
         {
 
             UIManager.Instance.resultPanel.gameObject.SetActive(true);
-            // Có thể thêm animation scale lên nếu muốn
+            // Animation
             UIManager.Instance.resultPanel.transform.localScale = Vector3.zero;
             UIManager.Instance.resultPanel.transform.DOScale(1f, 0.4f).SetEase(Ease.OutBack);
 
         }
-        // Hiện ResultPanel
+        // Show ResultPanel
 
-        Debug.Log($"[ResultManager] Level {currentLevel} COMPLETE! EXP: {currentExp}/{GetRequiredExp()}");
+        //Debug.Log($"[ResultManager] Level {currentLevel} COMPLETE! EXP: {currentExp}/{GetRequiredExp()}");
     }
-
-    // Gọi từ nút "NEXT LEVEL"
     public void NextLevel()
     {
         int nextLevel = currentLevel + 1;
-        if (nextLevel > 5) nextLevel = 1; // vòng lặp
+        if (nextLevel > 5) nextLevel = 1; //Loop level
 
         string nextScene = $"Level {nextLevel}";
 
-        // Chuyển scene (UIManager sẽ xử lý DOTween.KillAll())
+        // Switch scene
         if (UIManager.HasInstance)
             UIManager.Instance.SwitchToScene(nextScene);
     }
@@ -128,4 +126,5 @@ public class ResultManager : BaseManager<ResultManager>
             return level;
         return 1;
     }
+    #endregion
 }

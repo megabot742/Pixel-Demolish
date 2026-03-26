@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -5,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Click Settings")]
-    [SerializeField] private LayerMask pixelCubeLayer = ~0;   // Layer của PixelCube (mặc định Everything)
+    [SerializeField] private LayerMask pixelCubeLayer = ~0;   // Layer of PixelCube (default Everything)
     [SerializeField] private float maxClickDistance = 100f;
 
     private Camera currentCamera;
@@ -31,16 +32,16 @@ public class PlayerInteraction : MonoBehaviour
         currentCamera = Camera.main;
         
         if (currentCamera == null)
-            Debug.LogWarning("[PlayerInteraction] Không tìm thấy Main Camera trong scene hiện tại!");
+            Debug.LogWarning("[PlayerInteraction] Main Camera not found in current scene!");
     }
 
     private void Update()
     {
-        // Nếu chưa có camera thì không làm gì
+        // Check Camera
         if (currentCamera == null) 
             return;
 
-        // Kiểm tra click (chuột hoặc touch)
+        // Check click
         if (Input.GetMouseButtonDown(0) || 
             (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
@@ -48,7 +49,7 @@ public class PlayerInteraction : MonoBehaviour
                 ? Input.mousePosition 
                 : Input.GetTouch(0).position;
 
-            // Bỏ qua nếu click vào UI (nút Build, HUD, ResultPanel...)
+            // Skip if clicking on UI (Build button, HUD, ResultPanel...)
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
 
@@ -58,12 +59,10 @@ public class PlayerInteraction : MonoBehaviour
             {
                 if (hit.collider.TryGetComponent(out PixelCube pixelCube))
                 {
-                    pixelCube.DetouchCube();        // Phá giống Saw
-
-                    // Tùy chọn: thêm hiệu ứng nhỏ
-                    // pixelCube.transform.DOShakeScale(0.2f, 0.1f);
-
-                    Debug.Log($"[Player Click] Phá PixelCube tại {hit.transform.name}");
+                    pixelCube.DetouchCube();
+                    //Animation
+                    pixelCube.transform.DOShakeScale(0.2f, 0.1f);
+                    //Debug.Log($"[Player Click] Break PixelCube at {hit.transform.name}");
                 }
             }
         }

@@ -50,6 +50,8 @@ MonoBehaviour:
   - {fileID: 4130353557617653429, guid: de534dabd8321eb41b8ba0c809a25d4e, type: 3}
   - {fileID: 2342642185280357424, guid: dbce39f2bdededd4bbae1c4959f12c3e, type: 3}
   - {fileID: 8513141824630705986, guid: f99e49483910b7842a2a37ca8d070e84, type: 3}
+  - {fileID: 1199721399923421304, guid: cbcfce70b6e79d94b87d5fc1ceb0a39f, type: 3}
+  - {fileID: 3958846170062156297, guid: a066218b2a55cd9499693044cb686777, type: 3}
   spawnCountDown: 7
   spawnPoint: {fileID: 0}
   randomRotationRange: 80

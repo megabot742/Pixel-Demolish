@@ -39,6 +39,7 @@ public class SpawnManager : BaseManager<SpawnManager>
             StartSpawning();
         }
     }
+    #region Handle
     private bool IsLevelScene(string sceneName)
     {
         return sceneName.StartsWith("Level ");
@@ -50,27 +51,27 @@ public class SpawnManager : BaseManager<SpawnManager>
         if (spawnObj != null)
         {
             spawnPoint = spawnObj.transform;
-            Debug.Log($"[SpawnManager] Tìm thấy SpawnPoint tại {spawnPoint.position} trong scene {SceneManager.GetActiveScene().name}");
+            //Debug.Log($"[SpawnManager] Found SpawnPoint at {spawnPoint.position} in scene {SceneManager.GetActiveScene().name}");
         }
         else
         {
-            spawnPoint = transform; // fallback: dùng vị trí của chính SpawnManager
-            Debug.LogWarning("[SpawnManager] Không tìm thấy GameObject có tag 'SpawnPoint'! Sử dụng vị trí mặc định của SpawnManager.");
+            spawnPoint = transform; // fallback: uses the location of SpawnManager itself
+            //Debug.LogWarning("[SpawnManager] No GameObject with tag 'SpawnPoint' found! Use SpawnManager's default location.");
         }
     }
     public void StartSpawning()
     {
         if (entityPrefabs.Count == 0)
         {
-            Debug.LogError("[SpawnManager] Chưa gán entityPrefabs!");
+            //Debug.LogError("[SpawnManager] Don't have entityPrefabs!");
             return;
         }
 
-        StopSpawning(); // Dừng coroutine cũ trước
+        StopSpawning(); //Stop old coroutine
 
         isSpawning = true;
         spawnCoroutine = StartCoroutine(SpawnRoutine());
-        Debug.Log("[SpawnManager] Bắt đầu spawn Entity");
+        //Debug.Log("[SpawnManager] Start spawn Entity");
     }
 
     public void StopSpawning()
@@ -87,13 +88,13 @@ public class SpawnManager : BaseManager<SpawnManager>
     {
         while (isSpawning)
         {
-            if (spawnPoint != null)        // Kiểm tra an toàn
+            if (spawnPoint != null) //Check
             {
                 SpawnOneEntity();
             }
             else
             {
-                Debug.LogWarning("[SpawnManager] spawnPoint bị null → Dừng spawn");
+                //Debug.LogWarning("[SpawnManager] spawnPoint is null → Stop spawning");
                 yield break;
             }
 
@@ -123,8 +124,7 @@ public class SpawnManager : BaseManager<SpawnManager>
 
         //Debug.Log($"Spawn Entity: {prefabToSpawn.name} | Z Rotation: {randomZ:F1}°");
     }
-
-    // ====================== CÁC HÀM DEBUG & TEST ======================
+    #endregion
     #region ContextMenu
     [ContextMenu("Spawn One Entity Now")]
     public void SpawnOneEntityNow()

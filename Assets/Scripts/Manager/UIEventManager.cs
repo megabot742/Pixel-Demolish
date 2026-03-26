@@ -44,7 +44,7 @@ public class UIEventManager : BaseManager<UIEventManager>
     }
     public void QuitGame()
     {
-        Debug.Log("Exit game");
+        //Debug.Log("Exit game");
 #if UNITY_EDITOR
         EditorApplication.isPlaying = false;
 #else

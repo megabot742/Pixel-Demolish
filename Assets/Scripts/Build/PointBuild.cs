@@ -41,7 +41,7 @@ public class PointBuild : MonoBehaviour
         {
             Destroy(transform.GetChild(i).gameObject);
         }
-        Debug.Log($"[PointBuild] Have Reset {name}");
+        //Debug.Log($"[PointBuild] Have Reset {name}");
     }
 
     #region ContextMenu Testing

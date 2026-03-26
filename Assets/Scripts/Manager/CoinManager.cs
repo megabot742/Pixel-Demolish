@@ -28,7 +28,7 @@ public class CoinManager : BaseManager<CoinManager>
             scene.name == "Level 3" || scene.name == "Level 4" || scene.name == "Level 5")
         {
             ResetCoins();
-            Debug.Log($"[CoinManager] Scene {scene.name} loaded → Reset coin to 0");
+            //Debug.Log($"[CoinManager] Scene {scene.name} loaded → Reset coin to 0");
         }
     }
     #endregion

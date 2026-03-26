@@ -6,9 +6,9 @@ using UnityEngine.SceneManagement;
 public class BuildManager : BaseManager<BuildManager>
 {
     [Header("Build Settings")]
-    [SerializeField] private GameObject sawPrefab;           // Kéo prefab Saw vào đây
-    [SerializeField] private int minCoin = 100;              // Giá tiền cơ bản (Saw đầu tiên)
-    [SerializeField] private int nextCoin = 50;              // Tăng thêm mỗi lần build tiếp theo
+    [SerializeField] private GameObject sawPrefab;           // Saw Prefab
+    [SerializeField] private int minCoin = 100;              // Base Coint Price
+    [SerializeField] private int nextCoin = 50;              // Increases each subsequent build
 
     [Header("UI Build Prompt")]
     [SerializeField] private GameObject buildPromptPrefab;
@@ -25,7 +25,7 @@ public class BuildManager : BaseManager<BuildManager>
     }
     private void OnDestroy()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded; // tránh leak
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     #endregion
 
@@ -35,25 +35,25 @@ public class BuildManager : BaseManager<BuildManager>
     }
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Chỉ xử lý khi vào các Level
+        // Only processed when entering Levels
         if (scene.name == "Level 1" || scene.name == "Level 2" ||
             scene.name == "Level 3" || scene.name == "Level 4" || scene.name == "Level 5")
         {
-            Debug.Log($"[BuildManager] Scene {scene.name} loaded → Re-initialize PointBuilds");
+            //Debug.Log($"[BuildManager] Scene {scene.name} loaded → Re-initialize PointBuilds");
 
-            currentBuildCost = minCoin;           // Reset giá build mỗi level (bạn có thể bỏ dòng này nếu muốn giá tăng mãi)
+            currentBuildCost = minCoin;           //Reset the build price per level (you can remove this line if you want the price to increase forever)
             FindAllPointBuilds();
             SpawnInitialSaws();
             SpawnBuildPromptsForEmptyPoints();
         }
     }
-
+    #region Handle
     private void FindAllPointBuilds()
     {
         pointBuilds.Clear();
         var found = FindObjectsByType<PointBuild>(FindObjectsSortMode.None);
         pointBuilds.AddRange(found);
-        Debug.Log($"[BuildManager] Found {pointBuilds.Count} PointBuild in scene.");
+        //Debug.Log($"[BuildManager] Found {pointBuilds.Count} PointBuild in scene.");
     }
 
     private void SpawnInitialSaws()
@@ -82,7 +82,7 @@ public class BuildManager : BaseManager<BuildManager>
         if (buildPromptPrefab == null) return;
 
         GameObject ui = Instantiate(buildPromptPrefab, point.transform);
-        ui.transform.localPosition = new Vector3(0, 0, 0);   // ← Chỉnh chiều cao nút nổi lên, or 1.8f
+        ui.transform.localPosition = new Vector3(0, 0, 0);   // tranfrom spawn position 
         ui.transform.localRotation = Quaternion.identity;
 
         var promptScript = ui.GetComponent<BuildPromptUI>();
@@ -91,14 +91,14 @@ public class BuildManager : BaseManager<BuildManager>
             promptScript.Setup(point);
         }
 
-        point.SetBuildUI(ui);   // Gắn UI vào PointBuild để sau này ẩn
-        Debug.Log($"[BuildManager] Show build button at {point.name}");
+        point.SetBuildUI(ui);   // Attach UI to PointBuild to hide later
+        //Debug.Log($"[BuildManager] Show build button at {point.name}");
     }
     private void SpawnSawAt(PointBuild point, bool isFree = false)
     {
         if (point.HasSaw)
         {
-            Debug.LogWarning($"[BuildManager] Point {point.name} have built");
+            //Debug.LogWarning($"[BuildManager] Point {point.name} have built");
             return;
         }
 
@@ -138,12 +138,12 @@ public class BuildManager : BaseManager<BuildManager>
         }
         else
         {
-            Debug.Log($"[BuildManager] Spawn initial free Saw tại {point.name}");
+            //Debug.Log($"[BuildManager] Spawn initial free Saw tại {point.name}");
         }
 
         if (sawPrefab == null)
         {
-            Debug.LogError("[BuildManager] Saw Prefab has not been assigned yet!");
+            //Debug.LogError("[BuildManager] Saw Prefab has not been assigned yet!");
             return;
         }
 
@@ -154,7 +154,7 @@ public class BuildManager : BaseManager<BuildManager>
 
         point.MarkAsBuilt();
         point.HideBuildUI();
-        Debug.Log($"[BuildManager] Đã spawn Saw tại {point.name}");
+        Debug.Log($"[BuildManager] Saw spawned at {point.name}");
     }
 
     public void BuildSaw(PointBuild point)
@@ -162,7 +162,7 @@ public class BuildManager : BaseManager<BuildManager>
         if (point == null) return;
         SpawnSawAt(point, false);
     }
-
+    #endregion
     #region ContextMenu
     [ContextMenu("Test Spawn All Initial (Free)")]
     private void TestSpawnInitial() => SpawnInitialSaws();

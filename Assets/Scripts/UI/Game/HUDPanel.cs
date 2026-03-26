@@ -14,17 +14,8 @@ public class HUDPanel : MonoBehaviour
     [Header("Level")]
     public TMP_Text expTxt;
     public Slider expSlider;
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
+    
+    #region Handler
     public void ShowNotification(string message, Color color, float duration = 1f)
     {
         if (notifyTxt == null || notifyGameObject == null) return;
@@ -33,7 +24,7 @@ public class HUDPanel : MonoBehaviour
         notifyTxt.color = color;
         notifyGameObject.SetActive(true);
 
-        // Cập nhật thời gian tự tắt (nếu bạn muốn linh hoạt hơn 1s)
+        // Update auto-off time (if you want more flexibility than 1s)
         var disableScript = notifyGameObject.GetComponent<DisableOverTime>();
         if (disableScript != null)
         {
@@ -42,7 +33,7 @@ public class HUDPanel : MonoBehaviour
     }
     public void UpdateExpUI(int current, int required)
     {
-        if (expTxt != null)   // Bạn đã đổi tên thành expTxt
+        if (expTxt != null)
         {
             expTxt.text = $"EXP: {current}/{required}";
         }
@@ -58,11 +49,13 @@ public class HUDPanel : MonoBehaviour
         if (ResultManager.HasInstance)
         {
             int current = ResultManager.Instance.CurrentExp;
-            int required = ResultManager.Instance.GetRequiredExp();   // cần public ở ResultManager
+            int required = ResultManager.Instance.GetRequiredExp();
 
             UpdateExpUI(current, required);
         }
     }
+    #endregion
+    #region Button
     public void OnClickRestart()
     {
         if (UIManager.HasInstance)
@@ -79,4 +72,5 @@ public class HUDPanel : MonoBehaviour
             UIEventManager.Instance.BackMenu(); //Return scene Menu
         }
     }
+    #endregion
 }

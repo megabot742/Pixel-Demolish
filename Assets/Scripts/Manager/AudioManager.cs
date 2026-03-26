@@ -28,12 +28,12 @@ public class AudioManager : BaseManager<AudioManager>
         base.Awake();
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        // Force AudioSource luôn sẵn sàng
+        // Force AudioSource is always ready
         if (musicSource != null)
         {
             musicSource.enabled = true;
             musicSource.playOnAwake = false;
-            musicSource.loop = false;           // Quan trọng: tắt loop vì ta tự quản lý
+            musicSource.loop = false;  
         }
     }
 
@@ -51,7 +51,7 @@ public class AudioManager : BaseManager<AudioManager>
     {
         string currentScene = scene.name;
 
-        // Chỉ phát nhạc nếu scene thay đổi (tránh lặp nhiều lần)
+        // Only play music if the scene changes (avoid loop)
         if (currentScene != lastSceneName)
         {
             lastSceneName = currentScene;
@@ -67,7 +67,7 @@ public class AudioManager : BaseManager<AudioManager>
         SetMusicVolume(musicVol);
         SetSFXVolume(sfxVol);
     }
-
+    #region Handle
     public void SetMusicVolume(float normalizedVolume)
     {
         PlayerPrefs.SetFloat(MUSIC_VOLUME_KEY, normalizedVolume);
@@ -89,15 +89,14 @@ public class AudioManager : BaseManager<AudioManager>
 
         AudioClip[] newPlaylist = (sceneName == "Menu") ? menuMusicClips : gameMusicClips;
 
-        // Nếu playlist giống hệt và đang phát → không làm gì
-        if (newPlaylist == currentPlaylist && musicSource.isPlaying)
-            return;
+        // If the playlist is identical and is playing → do nothing
+        if (newPlaylist == currentPlaylist && musicSource.isPlaying) return;
 
         currentPlaylist = newPlaylist;
 
         if (currentPlaylist == null || currentPlaylist.Length == 0)
         {
-            Debug.LogWarning($"[AudioManager] Không có nhạc cho scene: {sceneName}");
+            //Debug.LogWarning($"[AudioManager] There is no music for the scene: {sceneName}");
             return;
         }
 
@@ -109,12 +108,14 @@ public class AudioManager : BaseManager<AudioManager>
         if (musicSource == null || currentPlaylist == null || currentPlaylist.Length == 0)
             return;
 
-        // Force bật AudioSource
+        // Force enabled AudioSource
         musicSource.enabled = true;
         if (!musicSource.gameObject.activeInHierarchy)
+        {
             musicSource.gameObject.SetActive(true);
+        }
 
-        // Chọn track ngẫu nhiên (tránh lặp bài ngay lập tức)
+        // Play random track
         int newIndex = Random.Range(0, currentPlaylist.Length);
         while (newIndex == currentTrackIndex && currentPlaylist.Length > 1)
             newIndex = Random.Range(0, currentPlaylist.Length);
@@ -123,7 +124,7 @@ public class AudioManager : BaseManager<AudioManager>
         musicSource.clip = currentPlaylist[currentTrackIndex];
         musicSource.Play();
 
-        Debug.Log($"[AudioManager] Đang phát: {musicSource.clip.name}");
+        //Debug.Log($"[AudioManager] Play: {musicSource.clip.name}");
     }
 
     private void Update()
@@ -134,8 +135,8 @@ public class AudioManager : BaseManager<AudioManager>
             PlayRandomTrack();
         }
     }
-
-    // Gọi từ Setting Panel
+    #endregion
+    //Setting Panel
     public void UpdateMusicVolumeFromSlider(float value) => SetMusicVolume(value);
     public void UpdateSFXVolumeFromSlider(float value)   => SetSFXVolume(value);
 }

@@ -1,14 +1,14 @@
 # Pixel Demolish
 Casual Pixel Destruction game
 
-#Unity version: 2022.3.62f3 
+# Unity version: 2022.3.62f3 
 
-#Hướng dẫn mở project
+# Hướng dẫn mở project
 - Clone từ github về, lựa chọn version Unity phù hợp
 - Lưu ý là Project ở định dạng URP
 - Mở thư mục Scene, chọn scene Menu làm nơi bắt đầu và chạy game
 
-#Các code system chính:
+# Các code system chính:
 - Liên quan đến các khối:
   - PixelCube.cs: quản lí tách rời khỏi thực thể cha, phá hủy khối
   - Enity.cs: quản lí vật lí của thực thể bao gồm nhiều PixelCube liên kết lại. Và tạo tác hàm xử lí khi pha chạm hoặc tách thành thực thể nhỏ hơn

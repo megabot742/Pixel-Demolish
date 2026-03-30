@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -82,7 +83,7 @@ public class BuildManager : BaseManager<BuildManager>
         if (buildPromptPrefab == null) return;
 
         GameObject ui = Instantiate(buildPromptPrefab, point.transform);
-        ui.transform.localPosition = new Vector3(0, 0, 0);   // tranfrom spawn position 
+        ui.transform.localPosition = new Vector3(0, 0, -1);   // tranfrom spawn position 
         ui.transform.localRotation = Quaternion.identity;
 
         var promptScript = ui.GetComponent<BuildPromptUI>();
@@ -148,13 +149,23 @@ public class BuildManager : BaseManager<BuildManager>
         }
 
         // Spawn saw child in PointBuild
+
+        point.HideModelRootWithEffect(() =>
+    {
+        // Spawn Saw sau khi ModelRoot đã fade xong
         GameObject newSaw = Instantiate(sawPrefab, point.transform);
         newSaw.transform.localPosition = Vector3.zero;
         newSaw.transform.localRotation = Quaternion.identity;
 
+        // Hiệu ứng Saw xuất hiện (pop-in)
+        newSaw.transform.localScale = Vector3.zero;
+        newSaw.transform.DOScale(Vector3.one, 0.45f).SetEase(Ease.OutBack);
+
         point.MarkAsBuilt();
         point.HideBuildUI();
+
         Debug.Log($"[BuildManager] Saw spawned at {point.name}");
+    });
     }
 
     public void BuildSaw(PointBuild point)

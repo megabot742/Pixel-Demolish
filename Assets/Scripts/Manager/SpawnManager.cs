@@ -109,7 +109,7 @@ public class SpawnManager : BaseManager<SpawnManager>
         GameObject prefabToSpawn = entityPrefabs[randomIndex];
 
         //Instantiate Spawn
-        GameObject newEntity = Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity);
+        GameObject newEntity = Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity, spawnPoint);
 
         //Random Z Rotation
         float randomZ = Random.Range(-randomRotationRange, randomRotationRange);

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3184400702228499896}
   - component: {fileID: 9138759527825018931}
   - component: {fileID: 7097077273723833500}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: PixelCube
   m_TagString: Untagged
   m_Icon: {fileID: 0}

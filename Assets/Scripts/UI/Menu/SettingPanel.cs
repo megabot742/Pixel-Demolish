@@ -9,7 +9,7 @@ public class SettingPanel : MonoBehaviour
     [SerializeField] AudioMixer myMixed;
     [SerializeField] Slider sfxSlider;
     [SerializeField] Slider musicSlider;
-    private void Update()
+    private void Start()
     {
         if (AudioManager.HasInstance)
         {

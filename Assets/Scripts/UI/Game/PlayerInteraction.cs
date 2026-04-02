@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,40 +31,51 @@ public class PlayerInteraction : MonoBehaviour
     private void FindCurrentCamera()
     {
         currentCamera = Camera.main;
-        
+
         if (currentCamera == null)
             Debug.LogWarning("[PlayerInteraction] Main Camera not found in current scene!");
     }
 
     private void Update()
     {
-        // Check Camera
-        if (currentCamera == null) 
-            return;
+        if (currentCamera == null) return;
 
-        // Check click
-        if (Input.GetMouseButtonDown(0) || 
-            (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+        bool isTouch = Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began;
+        bool isMouse = Input.GetMouseButtonDown(0);
+
+        if (!isTouch && !isMouse) return;
+
+        Vector3 inputPos = isMouse ? Input.mousePosition : Input.GetTouch(0).position;
+
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
-            Vector3 inputPos = Input.GetMouseButtonDown(0) 
-                ? Input.mousePosition 
-                : Input.GetTouch(0).position;
+            return;  // vẫn giữ để an toàn
+        }
 
-            // Skip if clicking on UI (Build button, HUD, ResultPanel...)
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                return;
+        // Kiểm tra bổ sung cho touch (rất hiệu quả)
+        if (isTouch && EventSystem.current != null)
+        {
+            PointerEventData eventData = new PointerEventData(EventSystem.current);
+            eventData.position = inputPos;
 
-            Ray ray = currentCamera.ScreenPointToRay(inputPos);
-            
-            if (Physics.Raycast(ray, out RaycastHit hit, maxClickDistance, pixelCubeLayer))
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+
+            if (results.Count > 0)
             {
-                if (hit.collider.TryGetComponent(out PixelCube pixelCube))
-                {
-                    pixelCube.DetouchCube();
-                    //Animation
-                    pixelCube.transform.DOShakeScale(0.2f, 0.1f);
-                    //Debug.Log($"[Player Click] Break PixelCube at {hit.transform.name}");
-                }
+                // Có UI element nào bị chạm → bỏ qua
+                return;
+            }
+        }
+
+        Ray ray = currentCamera.ScreenPointToRay(inputPos);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, maxClickDistance, pixelCubeLayer))
+        {
+            if (hit.collider.TryGetComponent(out PixelCube pixelCube))
+            {
+                pixelCube.DetouchCube();
+                pixelCube.transform.DOShakeScale(0.2f, 0.1f);
             }
         }
     }

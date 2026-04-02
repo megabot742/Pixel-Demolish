@@ -179,6 +179,27 @@ public class Enity : MonoBehaviour
 
         return cubesInfoLocation[gridPosition.x, gridPosition.y];
     }
+    public void ForceDisassembleAllCubes()
+    {
+        if (pixelCube == null || pixelCube.Length == 0)
+            return;
+
+        // Tách từng cube còn lại ra
+        for (int i = 0; i < pixelCube.Length; i++)
+        {
+            if (pixelCube[i] != null)
+            {
+                PixelCube cube = pixelCube[i];
+                if (cube != null)
+                {
+                    // Gọi DetouchCube để tách ra và thêm Rigidbody riêng
+                    DetouchCube(cube);
+                }
+            }
+        }
+
+        // Sau khi tách hết, Enity sẽ tự Destroy() trong RecalculateCubes()
+    }
     #endregion
 
     #region Visual Editor Check

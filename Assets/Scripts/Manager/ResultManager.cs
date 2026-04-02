@@ -88,8 +88,14 @@ public class ResultManager : BaseManager<ResultManager>
 
         // Stop SpawnManager
         if (SpawnManager.HasInstance)
-            SpawnManager.Instance.StopSpawning();
+            SpawnManager.Instance.CompleteLevel();
 
+        Enity[] allEntities = FindObjectsByType<Enity>(FindObjectsSortMode.None);
+        foreach (var entity in allEntities)
+        {
+            if (entity != null)
+                entity.ForceDisassembleAllCubes();
+        }
         if (UIManager.HasInstance)
         {
 

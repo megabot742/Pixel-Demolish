@@ -25,13 +25,15 @@ public class SpawnZone : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (spawnManager == null) return;
+        if (spawnManager.IsLevelCompleted()) return;
 
         if (IsEntity(other))
         {
             entityCount++;
+            
             if (entityCount == 1)
             {
-                spawnManager.StopSpawning();
+                spawnManager.SetCanSpawn(false);
                 if (debugLog) Debug.LogWarning("[SpawnZone] Zone occupied → Stop spawning");
             }
         }
@@ -40,15 +42,15 @@ public class SpawnZone : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         if (spawnManager == null) return;
+        if (spawnManager.IsLevelCompleted()) return;
 
         if (IsEntity(other))
         {
-            if (entityCount > 0)
-                entityCount--;
+            if (entityCount > 0) entityCount--;
 
             if (entityCount == 0)
             {
-                spawnManager.StartSpawning();
+                spawnManager.SetCanSpawn(true);
                 if (debugLog) Debug.LogWarning("[SpawnZone] Zone clear → Resume spawning");
             }
         }

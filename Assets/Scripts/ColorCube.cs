@@ -5,6 +5,15 @@ using UnityEngine;
 public class ColorCube : MonoBehaviour
 {
     [SerializeField] private Color cubeColor = Color.white;
+    public Color CubeColor
+    {
+        get => cubeColor;
+        set
+        {
+            cubeColor = value;
+            ApplyColor(cubeColor);
+        }
+    }
 
     private void Awake()
     {
@@ -18,9 +27,9 @@ public class ColorCube : MonoBehaviour
     {
         MeshRenderer renderer = GetComponent<MeshRenderer>();
         MaterialPropertyBlock propertyBlock = new MaterialPropertyBlock();
-        propertyBlock.SetColor("_BaseColor", color); //URP option
+        propertyBlock.SetColor("_BaseColor", color); //Thiết lập URP 
         renderer.SetPropertyBlock(propertyBlock);
-        
+
     }
     public void ApplyDetouchColor()
     {

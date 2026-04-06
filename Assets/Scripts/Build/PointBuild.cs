@@ -27,11 +27,10 @@ public class PointBuild : MonoBehaviour
     private void FindModelRoot()
     {
         // Tìm theo Tag để linh hoạt hơn
-        GameObject rootObj = GameObject.FindWithTag("ModelRoot");
+        modelRoot = GetComponentInChildren<Transform>().Find("ModelRoot");
         
-        if (rootObj != null && rootObj.transform.IsChildOf(transform))
+        if (modelRoot != null)
         {
-            modelRoot = rootObj.transform;
             modelRenderer = modelRoot.GetComponent<MeshRenderer>();
             modelCollider = modelRoot.GetComponent<Collider>();   // CapsuleCollider hoặc BoxCollider gì cũng được
 

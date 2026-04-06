@@ -22,7 +22,7 @@ public class Enity : MonoBehaviour
         RecalculateCubes(); //Check cube and ungroup if necessary (after hit saw or gear)
     }
     #region CollectCubes
-    private void CollectCubes()
+    public void CollectCubes()
     {
         //Find the bounding box cube child
         Vector3 min = Vector3.one * float.MaxValue;

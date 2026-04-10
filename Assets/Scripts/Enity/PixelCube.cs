@@ -18,7 +18,7 @@ public class PixelCube : MonoBehaviour
         Enity parentEntity = GetComponentInParent<Enity>();
         if (parentEntity != null)
         {
-            parentEntity.DetouchCube(this);
+            parentEntity.DetouchCubeFromChild(this);
         }
         GetComponent<ColorCube>().ApplyDetouchColor();
 

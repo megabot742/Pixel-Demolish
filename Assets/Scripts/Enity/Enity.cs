@@ -16,15 +16,31 @@ public class Enity : MonoBehaviour
         //FrezzeRoation 
         rigiBD.constraints = RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY;
         //Parent Mass = childCount (with each child = 1)
-        rigiBD.mass = transform.childCount;
+        //rigiBD.mass = transform.childCount;
 
-        CollectCubes(); //Collect cube form child
-        RecalculateCubes(); //Check cube and ungroup if necessary (after hit saw or gear)
+        // CollectCubes(); //Collect cube form child
+        // RecalculateCubes(); //Check cube and ungroup if necessary (after hit saw or gear)
+    }
+    public void InitializeAfterSpawn()
+    {
+        // Set mass dựa trên số child thực tế
+        if (rigiBD == null)
+            rigiBD = GetComponent<Rigidbody>();
+        rigiBD.mass = transform.childCount > 0 ? transform.childCount : 1;
+
+        CollectCubes();        // Lần này mới có child
+        RecalculateCubes();    // Kiểm tra group nếu cần
     }
     #region CollectCubes
     public void CollectCubes()
     {
-        //Find the bounding box cube child
+        if (transform.childCount == 0)
+        {
+            Debug.LogWarning($"[Enity] {gameObject.name} không có child nào!");
+            return;
+        }
+
+        // Tìm min và max
         Vector3 min = Vector3.one * float.MaxValue;
         Vector3 max = Vector3.one * float.MinValue;
 
@@ -34,31 +50,53 @@ public class Enity : MonoBehaviour
             min = Vector3.Min(min, child.localPosition);
             max = Vector3.Max(max, child.localPosition);
         }
-        // Calculate grid size
+
+        // === SỬA Ở ĐÂY: Giới hạn kích thước grid để tránh overflow ===
         Vector2Int delta = Vector2Int.RoundToInt(max - min);
+
+        // Bảo vệ an toàn
+        if (delta.x > 100 || delta.y > 100)
+        {
+            Debug.LogError($"[Enity] Grid quá lớn! delta = {delta}. Kiểm tra vị trí pixel.");
+            delta = new Vector2Int(Mathf.Min(delta.x, 100), Mathf.Min(delta.y, 100));
+        }
+
         cubesInfoLocation = new int[delta.x + 1, delta.y + 1];
 
-        //Save start point (0,0) left bottom corner Gird
         cubesInfoStartPosition = min;
         pixelCube = GetComponentsInChildren<PixelCube>();
 
-        //Loop, check and add ID to Grid 
+        // Gán ID
         for (int i = 0; i < transform.childCount; i++)
         {
             Transform child = transform.GetChild(i);
             Vector2Int grid = GridPosition(child.localPosition);
 
-            // ID statr form 1 to n
-            cubesInfoLocation[grid.x, grid.y] = i + 1;
-
-            // Assign it back to Cube for easy reference later
-            pixelCube[i].Id = i + 1;
+            // Bảo vệ index không vượt mảng
+            if (grid.x >= 0 && grid.x < cubesInfoLocation.GetLength(0) &&
+                grid.y >= 0 && grid.y < cubesInfoLocation.GetLength(1))
+            {
+                cubesInfoLocation[grid.x, grid.y] = i + 1;
+                if (i < pixelCube.Length)
+                    pixelCube[i].Id = i + 1;
+            }
         }
+
+        //Debug.Log($"[Enity] {gameObject.name} CollectCubes thành công | Grid: {delta.x + 1} x {delta.y + 1}");
     }
     #endregion
     #region RecalculateCubes
     private void RecalculateCubes()
     {
+        // Bảo vệ nếu pixelCube chưa được khởi tạo
+        if (pixelCube == null || pixelCube.Length == 0)
+        {
+            // Nếu vừa mới tạo từ data, ta sẽ gọi CollectCubes() trước
+            CollectCubes();
+            if (pixelCube == null || pixelCube.Length == 0)
+                return;
+        }
+
         // Collect all existing cube ID
         List<int> freeCubeIds = new List<int>();
         for (int i = 0; i < pixelCube.Length; i++)
@@ -118,7 +156,7 @@ public class Enity : MonoBehaviour
             newEntity.AddComponent<Enity>();
         }
 
-        // After splitting, update the mesh for the current Entity
+        // Update lại sau khi split
         CollectCubes();
     }
     private void FillCube(int startID, List<int> freeCubeIds, CubeGroup currentGroup)
@@ -141,26 +179,42 @@ public class Enity : MonoBehaviour
         }
     }
     #endregion
-    #region DetouchCube
+    #region DetouchCubeFromChild
     //Cube is split
-    public void DetouchCube(PixelCube cube)
+    public void DetouchCubeFromChild(PixelCube cube)
     {
+        if (cube == null) return;
+
+        // Bảo vệ trường hợp Enity chưa được khởi tạo đầy đủ
+        if (cubesInfoLocation == null || pixelCube == null)
+        {
+            InitializeAfterSpawn();
+            if (pixelCube == null) return;
+        }
+
         Vector2Int grid = GridPosition(cube.transform.localPosition);
 
         // Remove from grid
-        cubesInfoLocation[grid.x, grid.y] = 0;
+        if (grid.x >= 0 && grid.x < cubesInfoLocation.GetLength(0) &&
+            grid.y >= 0 && grid.y < cubesInfoLocation.GetLength(1))
+        {
+            cubesInfoLocation[grid.x, grid.y] = 0;
+        }
 
-        // Delete reference
-        pixelCube[cube.Id - 1] = null;
+        // Xóa reference an toàn
+        if (cube.Id > 0 && cube.Id - 1 < pixelCube.Length)
+        {
+            pixelCube[cube.Id - 1] = null;
+        }
 
-        // Detached from parent (current Entity)
+        // Tách ra khỏi parent
         cube.transform.parent = null;
 
-        // Add Rigidbody for individual cube (so it falls independently)
+        // Thêm Rigidbody riêng cho cube rơi tự do
         var rb = cube.gameObject.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezePositionZ;
 
-        // Recheck the entire structure
+        // Kiểm tra lại cấu trúc sau khi tách
         RecalculateCubes();
     }
     // Switch localPosition → grid coordinates (grid)
@@ -193,7 +247,7 @@ public class Enity : MonoBehaviour
                 if (cube != null)
                 {
                     // Gọi DetouchCube để tách ra và thêm Rigidbody riêng
-                    DetouchCube(cube);
+                    DetouchCubeFromChild(cube);
                 }
             }
         }
@@ -206,26 +260,27 @@ public class Enity : MonoBehaviour
     //Draw mesh in scene View
     private void OnDrawGizmos()
     {
-        if (!Application.isPlaying)
-            return;
+        if (!Application.isPlaying) return;
+        if (cubesInfoLocation == null) return;
 
         Gizmos.matrix = transform.localToWorldMatrix;
+
         for (int x = 0; x < cubesInfoLocation.GetLength(0); x++)
         {
             for (int y = 0; y < cubesInfoLocation.GetLength(1); y++)
             {
                 Vector3 position = cubesInfoStartPosition + new Vector3(x, y, 0);
+
                 if (cubesInfoLocation[x, y] == 0)
                 {
                     Gizmos.color = Color.green;
-                    Gizmos.DrawSphere(position, 0.1f); //Green = Empty
+                    Gizmos.DrawSphere(position, 0.1f);
                 }
                 else
                 {
                     Gizmos.color = Color.red;
-                    Gizmos.DrawSphere(position, 0.2f); //Red = Have cube
+                    Gizmos.DrawSphere(position, 0.2f);
                 }
-
             }
         }
     }

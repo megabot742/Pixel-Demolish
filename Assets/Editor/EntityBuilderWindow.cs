@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.AddressableAssets;
 
 public class EntityBuilderWindow : EditorWindow
 {
@@ -9,35 +10,58 @@ public class EntityBuilderWindow : EditorWindow
     public static void ShowWindow() => GetWindow<EntityBuilderWindow>("Entity Builder");
 
     private GameObject pixelPrefab;
-    private int gridWidth = 20;
-    private int gridHeight = 20;
+    private int gridWidth = 20; //chiều rộng
+    private int gridHeight = 20; //chiều cao
+    //Lí do: 20x20, vì game ban đầu thiết kế với 1 Box 1x1x1, khoảng cách giữa 2 thành màn hình khoảng 24 box cố định ở mọi level, nên phải có giới hạn về kích thước Enity
 
     private struct PixelData
     {
-        public bool placed;
-        public Color color;
+        public bool placed; //Check vị trí
+        public Color color; //Check màu
+        public float zOffset; //Check trục Z
     }
     private PixelData[,] grid;
-
     private Color currentColor = Color.white;
     private GUIStyle pixelStyle;
+    private EntityData loadedEntityData;
+    private EntityDatabaseSO targetDatabase;
 
     private void OnEnable()
     {
         RefreshGrid();
+        // Tự load prefab lần cuối cùng
+        string prefabPath = EditorPrefs.GetString("EntityBuilder_PixelPrefabPath", "");
+        if (!string.IsNullOrEmpty(prefabPath))
+        {
+            pixelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        }
+
+        // Tự load Database lần cuối
+        string dbPath = EditorPrefs.GetString("EntityBuilder_DatabasePath", "");
+        if (!string.IsNullOrEmpty(dbPath))
+        {
+            targetDatabase = AssetDatabase.LoadAssetAtPath<EntityDatabaseSO>(dbPath);
+        }
+    }
+    private void OnDisable()
+    {
+        // Lưu lại khi đóng tool
+        if (pixelPrefab != null)
+            EditorPrefs.SetString("EntityBuilder_PixelPrefabPath", AssetDatabase.GetAssetPath(pixelPrefab));
+        if (targetDatabase != null)
+            EditorPrefs.SetString("EntityBuilder_DatabasePath", AssetDatabase.GetAssetPath(targetDatabase));
     }
 
     private void RefreshGrid()
     {
         grid = new PixelData[gridWidth, gridHeight];
-        // Mặc định để một vài pixel ví dụ (có thể xóa)
-        // Ví dụ: grid[10, 10].placed = true; grid[10, 10].color = Color.red;
+        // Mặc định zOffset = 0 (sẽ set lại khi vẽ mới hoặc load)
     }
 
     private void OnGUI()
     {
         GUILayout.BeginHorizontal();
-
+        #region LeftPanel
         // ====================== LEFT PANEL (Settings) ======================
         GUILayout.BeginVertical(GUILayout.Width(280));
         GUILayout.Label("ENTITY BUILDER TOOL", EditorStyles.boldLabel);
@@ -45,29 +69,53 @@ public class EntityBuilderWindow : EditorWindow
         pixelPrefab = (GameObject)EditorGUILayout.ObjectField("Pixel Prefab", pixelPrefab, typeof(GameObject), false);
 
         if (pixelPrefab == null)
-            EditorGUILayout.HelpBox("Chưa gán PixelCube Prefab!", MessageType.Warning);
+            EditorGUILayout.HelpBox("PixelCube Prefab not found!", MessageType.Warning);
 
-        currentColor = EditorGUILayout.ColorField("Màu vẽ hiện tại", currentColor);
+        currentColor = EditorGUILayout.ColorField("Current paint color", currentColor);
+
+        GUILayout.Space(10);
+
+        // ====================== LOAD & EDIT ======================
+        EditorGUILayout.LabelField("Edit Existing Asset", EditorStyles.boldLabel);
+        loadedEntityData = (EntityData)EditorGUILayout.ObjectField("EntityData", loadedEntityData, typeof(EntityData), false);
+
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Load EnityData to Grid", GUILayout.Height(25)))
+        {
+            if (loadedEntityData != null)
+                LoadEntityData(loadedEntityData);
+            else
+                EditorUtility.DisplayDialog("Error", "No EntityData selected yet!", "OK");
+        }
+        if (GUILayout.Button("Clear Grid", GUILayout.Height(25)))
+        {
+            if (EditorUtility.DisplayDialog("Clear All?", "Delete all pixels in the grid?", "Yes", "Cancel"))
+                RefreshGrid();
+        }
+        GUILayout.EndHorizontal();
+
+        // === DATABASE ===
+        GUILayout.Space(10);
+        EditorGUILayout.LabelField("Target Database", EditorStyles.boldLabel);
+        targetDatabase = (EntityDatabaseSO)EditorGUILayout.ObjectField("EntityDatabase", targetDatabase, typeof(EntityDatabaseSO), false);
+        if (targetDatabase == null)
+            EditorGUILayout.HelpBox("EnityDatabase not found!", MessageType.Warning);
 
         GUILayout.Space(10);
         if (GUILayout.Button("Refresh Grid (20x20)", GUILayout.Height(30)))
             RefreshGrid();
 
-        if (GUILayout.Button("Clear All", GUILayout.Height(30)))
-        {
-            if (EditorUtility.DisplayDialog("Clear All?", "Delete all pixels ?", "Yes", "Cancel"))
-                RefreshGrid();
-        }
-
         GUILayout.Space(20);
-        GUILayout.Label("Hướng dẫn:", EditorStyles.boldLabel);
-        GUILayout.Label("• Click ô = vẽ màu hiện tại\n• Click lại ô cùng màu = xóa", EditorStyles.wordWrappedLabel);
+        GUILayout.Label("Tutorial:", EditorStyles.boldLabel);
+        GUILayout.Label("• Click cell = draw\n• Same color = delete\n• New pixel = random Z\n• Old pixel = keep Z", EditorStyles.wordWrappedLabel);
 
         GUILayout.EndVertical();
+        #endregion
 
+        #region RightPanel
         // ====================== RIGHT PANEL (Pixel Grid) ======================
         GUILayout.BeginVertical();
-        GUILayout.Label($"GRID {gridWidth} × {gridHeight}  (Click để vẽ)", EditorStyles.boldLabel);
+        GUILayout.Label($"Grid matrix interface {gridWidth} × {gridHeight}  (Click to draw)", EditorStyles.boldLabel);
 
         if (grid == null)
         {
@@ -76,7 +124,7 @@ public class EntityBuilderWindow : EditorWindow
             return;
         }
 
-        // Vẽ grid từ trên xuống (y = height-1 → 0)
+        // Hiển thị grid (y = height-1 → 0)
         for (int y = gridHeight - 1; y >= 0; y--)
         {
             GUILayout.BeginHorizontal();
@@ -84,116 +132,197 @@ public class EntityBuilderWindow : EditorWindow
             {
                 PixelData p = grid[x, y];
 
-                // === SỬA Ở ĐÂY ===
                 Color displayColor = p.placed
-                    ? p.color               // Tăng sáng mạnh
-                    : new Color(0.25f, 0.25f, 0.25f, 1f);   // Nền tối hơn một chút cho dễ nhìn
+                    ? p.color
+                    : new Color(0.25f, 0.25f, 0.25f, 1f);
 
                 GUI.backgroundColor = displayColor;
-
                 InitPixelStyle();
 
                 if (GUILayout.Button("", pixelStyle, GUILayout.Width(24), GUILayout.Height(24)))
                 {
-                    if (p.placed &&
-                        Mathf.Approximately(p.color.r, currentColor.r) &&
-                        Mathf.Approximately(p.color.g, currentColor.g) &&
-                        Mathf.Approximately(p.color.b, currentColor.b))
-                    {
-                        grid[x, y].placed = false;   // Xóa
-                    }
-                    else
-                    {
-                        grid[x, y].placed = true;
-                        grid[x, y].color = currentColor;
-                    }
+                    HandlePixelClick(x, y, p);
                 }
 
-                GUI.backgroundColor = Color.white;   // Reset
+                GUI.backgroundColor = Color.white;
             }
             GUILayout.EndHorizontal();
         }
 
         GUILayout.EndVertical();
-
         GUILayout.EndHorizontal();
-
-        // ====================== CREATE BUTTON ======================
+        #endregion
+        // ====================== Save Button ======================
         GUILayout.Space(10);
         GUI.backgroundColor = new Color(0.2f, 0.8f, 0.2f);
-        if (GUILayout.Button("CREATE ENTITY", GUILayout.Height(50)))
+        if (GUILayout.Button(loadedEntityData != null ? "SAVE ENTITY" : "CREATE NEW ENTITY", GUILayout.Height(50)))
         {
             if (pixelPrefab == null)
             {
-                EditorUtility.DisplayDialog("Lỗi", "Chưa gán Pixel Prefab!", "OK");
+                EditorUtility.DisplayDialog("Error", "Prefab Not Found!", "OK");
                 return;
             }
-            CreateEntity();
+
+            if (loadedEntityData != null)
+                SaveToExistingEntity(loadedEntityData);
+            else
+                CreateNewEntity();
         }
         GUI.backgroundColor = Color.white;
     }
-    private void InitPixelStyle()
+    #region HandlePixelClick
+    private void HandlePixelClick(int x, int y, PixelData p)
     {
-        if (pixelStyle == null)
+        bool sameColor = p.placed &&
+            Mathf.Approximately(p.color.r, currentColor.r) &&
+            Mathf.Approximately(p.color.g, currentColor.g) &&
+            Mathf.Approximately(p.color.b, currentColor.b);
+
+        if (p.placed && sameColor)
         {
-            pixelStyle = new GUIStyle(GUI.skin.button);
-            pixelStyle.normal.background = Texture2D.whiteTexture;   // Nền trắng tinh
-            pixelStyle.hover.background = Texture2D.whiteTexture;
-            pixelStyle.active.background = Texture2D.whiteTexture;
-            pixelStyle.focused.background = Texture2D.whiteTexture;
+            // Xóa pixel
+            grid[x, y].placed = false;
+        }
+        else
+        {
+            // Vẽ / đổi màu
+            grid[x, y].placed = true;
+            grid[x, y].color = currentColor;
 
-            // Loại bỏ border để ô vuông đẹp hơn
-            pixelStyle.border = new RectOffset(0, 0, 0, 0);
-
-            // Tùy chọn: bo góc nhẹ nếu muốn
-            // pixelStyle.border = new RectOffset(2, 2, 2, 2);
+            // Chỉ random Z khi là pixel MỚI
+            if (!p.placed)
+                grid[x, y].zOffset = Random.Range(-0.15f, 0.15f);
+            // Nếu đã có pixel cũ → giữ nguyên zOffset
         }
     }
-    private void CreateEntity()
+    #endregion
+    #region LoadData
+    private void LoadEntityData(EntityData data)
     {
-        GameObject entityGO = new GameObject("New_Entity");
-        Enity enity = entityGO.AddComponent<Enity>();
+        RefreshGrid();
+
+        foreach (var pixel in data.pixels)
+        {
+            int gx = Mathf.RoundToInt(pixel.localPosition.x);
+            int gy = Mathf.RoundToInt(pixel.localPosition.y);
+
+            if (gx >= 0 && gx < gridWidth && gy >= 0 && gy < gridHeight)
+            {
+                grid[gx, gy].placed = true;
+                grid[gx, gy].color = pixel.color;
+                grid[gx, gy].zOffset = pixel.localPosition.z;   // Giữ nguyên Z cũ
+            }
+        }
+
+        Debug.Log($"Loading EntityData: {data.name} ({data.pixels.Count} pixels)");
+    }
+    #endregion
+    #region SaveData
+    private void SaveToExistingEntity(EntityData data)
+    {
+        data.pixels.Clear();
 
         int placedCount = 0;
-
         for (int x = 0; x < gridWidth; x++)
         {
             for (int y = 0; y < gridHeight; y++)
             {
                 if (!grid[x, y].placed) continue;
 
-                // Tạo cube
-                GameObject cube = (GameObject)PrefabUtility.InstantiatePrefab(pixelPrefab);
-                cube.transform.SetParent(entityGO.transform, false);
+                Vector3 pos = new Vector3(x, y, grid[x, y].zOffset);
+                data.pixels.Add(new PixelInfo(pos, grid[x, y].color));
+                placedCount++;
+            }
+        }
 
-                // Vị trí (để Enity tự tính min sau)
-                cube.transform.localPosition = new Vector3(x, y, Random.Range(-0.15f, 0.15f));
+        data.gridSize = new Vector2Int(gridWidth, gridHeight);
 
-                // Set màu
-                ColorCube colorComp = cube.GetComponent<ColorCube>();
-                if (colorComp != null)
-                    colorComp.CubeColor = grid[x, y].color;   // Dùng setter vừa thêm
+        EditorUtility.SetDirty(data);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
 
+        TryAddToDatabase(data);
+
+        Debug.Log($"EntityData Update: {data.name} ({placedCount} pixels)");
+        EditorGUIUtility.PingObject(data);
+    }
+    #endregion
+    #region CreateData
+    private void CreateNewEntity()
+    {
+        EntityData entityData = ScriptableObject.CreateInstance<EntityData>();
+        entityData.gridSize = new Vector2Int(gridWidth, gridHeight);
+
+        int placedCount = 0;
+        for (int x = 0; x < gridWidth; x++)
+        {
+            for (int y = 0; y < gridHeight; y++)
+            {
+                if (!grid[x, y].placed) continue;
+
+                Vector3 pos = new Vector3(x, y, grid[x, y].zOffset);
+                entityData.pixels.Add(new PixelInfo(pos, grid[x, y].color));
                 placedCount++;
             }
         }
 
         if (placedCount == 0)
         {
-            DestroyImmediate(entityGO);
-            EditorUtility.DisplayDialog("Rỗng", "Bạn chưa vẽ pixel nào!", "OK");
+            EditorUtility.DisplayDialog("Null pixel", "You haven't drawn any pixels yet!", "OK");
             return;
         }
 
-        // Khởi tạo Enity ngay trong Editor
-        enity.CollectCubes();           // Quan trọng!
-        // enity.RecalculateCubes();    // Không cần vì mới tạo là 1 khối liền
+        // Cho phép người dùng đặt tên asset (tên này sẽ là entity name sau này)
+        string defaultName = "New_Entity_" + System.DateTime.Now.ToString("yyyyMMdd_HHmm");
+        string path = EditorUtility.SaveFilePanelInProject(
+            "Save Entity Data",
+            defaultName,
+            "asset",
+            "Save Entity");
 
-        // Select và ping trong Hierarchy
-        Selection.activeGameObject = entityGO;
-        EditorGUIUtility.PingObject(entityGO);
+        if (!string.IsNullOrEmpty(path))
+        {
+            AssetDatabase.CreateAsset(entityData, path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
 
-        Debug.Log($"✅ Tạo thành công Entity với {placedCount} pixel!");
+            TryAddToDatabase(entityData);
+
+            Selection.activeObject = entityData;
+            EditorGUIUtility.PingObject(entityData);
+
+            Debug.Log($"✅ Tạo mới EntityData thành công ({placedCount} pixels)");
+        }
+    }
+    #endregion
+    private void TryAddToDatabase(EntityData data)
+    {
+        if (targetDatabase == null) return;
+
+        string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(data));
+
+        foreach (var r in targetDatabase.entityReferences)
+            if (r != null && r.AssetGUID == guid) return;
+
+        var newRef = new AssetReferenceEntityData(guid);
+        targetDatabase.entityReferences.Add(newRef);
+
+        EditorUtility.SetDirty(targetDatabase);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Debug.Log($"Added to Database: {data.name}");
+    }
+    private void InitPixelStyle()
+    {
+        if (pixelStyle == null)
+        {
+            pixelStyle = new GUIStyle(GUI.skin.button);
+            pixelStyle.normal.background = Texture2D.whiteTexture;
+            pixelStyle.hover.background = Texture2D.whiteTexture;
+            pixelStyle.active.background = Texture2D.whiteTexture;
+            pixelStyle.focused.background = Texture2D.whiteTexture;
+            pixelStyle.border = new RectOffset(0, 0, 0, 0);
+        }
     }
 }
-

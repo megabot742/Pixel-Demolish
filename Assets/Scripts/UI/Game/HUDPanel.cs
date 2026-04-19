@@ -24,14 +24,14 @@ public class HUDPanel : MonoBehaviour
         notifyTxt.color = color;
         notifyGameObject.SetActive(true);
 
-        // Update auto-off time (if you want more flexibility than 1s)
+        // Update thời gian tự tắt thông báo
         var disableScript = notifyGameObject.GetComponent<DisableOverTime>();
         if (disableScript != null)
         {
-            disableScript.timeToDisable = duration;
+            disableScript.SetTimeToDisable(duration);
         }
     }
-    public void UpdateExpUI(int current, int required)
+    public void UpdateExpUI(int current, int required) //Updae thông tin EXP
     {
         if (expTxt != null)
         {
@@ -44,7 +44,7 @@ public class HUDPanel : MonoBehaviour
             expSlider.value = current;
         }
     }
-    public void RefreshExpUI()
+    public void RefreshExpUI() //Reset thông tin EXP
     {
         if (ResultManager.HasInstance)
         {
@@ -55,7 +55,7 @@ public class HUDPanel : MonoBehaviour
         }
     }
     #endregion
-    #region Button
+    #region Button action
     public void OnClickRestart()
     {
         if (UIManager.HasInstance)

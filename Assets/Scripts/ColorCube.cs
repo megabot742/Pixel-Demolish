@@ -33,6 +33,6 @@ public class ColorCube : MonoBehaviour
     }
     public void ApplyDetouchColor()
     {
-        ApplyColor(cubeColor * 0.8f); //fade out color
+        ApplyColor(cubeColor * 0.8f); //fade out màu (màu sau khi bị detouch sẽ đậm hơn)
     }
 }

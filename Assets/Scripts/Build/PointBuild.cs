@@ -9,16 +9,20 @@ public class PointBuild : MonoBehaviour
 {
     [Header("Point Settings")]
     [SerializeField] private bool hasStartBuild = false;
-    public bool HasStartBuild => hasStartBuild;
+    public bool GetHasStartBuild => hasStartBuild;
 
     private bool hasSaw = false;
-    public bool HasSaw => hasSaw;
+    public bool GetHasSaw => hasSaw;
+    public void SetHasSaw() 
+    {
+        hasSaw = true;
+    }
     private GameObject buildUIInstance;
 
     [Header("Model Root")]
     [SerializeField] private Transform modelRoot;
     private MeshRenderer modelRenderer;
-    private Collider modelCollider;
+    private Collider2D modelCollider;
 
     private void Awake()
     {
@@ -26,13 +30,13 @@ public class PointBuild : MonoBehaviour
     }
     private void FindModelRoot()
     {
-        // Tìm theo Tag để linh hoạt hơn
+        // Tìm ModelRoot
         modelRoot = GetComponentInChildren<Transform>().Find("ModelRoot");
         
         if (modelRoot != null)
         {
             modelRenderer = modelRoot.GetComponent<MeshRenderer>();
-            modelCollider = modelRoot.GetComponent<Collider>();   // CapsuleCollider hoặc BoxCollider gì cũng được
+            modelCollider = modelRoot.GetComponent<Collider2D>(); 
 
             if (modelRenderer == null)
                 Debug.LogWarning($"[PointBuild] ModelRoot at {name} không có MeshRenderer!");
@@ -44,12 +48,12 @@ public class PointBuild : MonoBehaviour
             Debug.LogWarning($"[PointBuild] Không tìm thấy ModelRoot với Tag 'ModelRoot' trong {name}");
         }
     }
-    public void SetBuildUI(GameObject uiInstance)
+    public void SetBuildUI(GameObject uiInstance) //Khởi tạo Build UI
     {
         buildUIInstance = uiInstance;
     }
 
-    public void HideBuildUI()
+    public void HideBuildUI() //Ẩn đi Build UI
     {
         if (buildUIInstance != null)
         {
@@ -88,7 +92,7 @@ public class PointBuild : MonoBehaviour
             onComplete?.Invoke();
         }
     }
-    public void ShowModelRoot()
+    public void ShowModelRoot() //TODO: sau này nếu muốn thêm tính năng tháo saw và build thành tháp khác
     {
         if (modelRoot == null) return;
 
@@ -108,21 +112,9 @@ public class PointBuild : MonoBehaviour
 
         hasSaw = false;   // Reset trạng thái
     }
-    public void MarkAsBuilt() //Check mark
-    {
-        hasSaw = true;
-    }
+   
 
-    public void ResetBuildPoint() //Reset Point Build, use only for testing
-    {
-        hasSaw = false;
-        //Detele child
-        for (int i = transform.childCount - 1; i >= 0; i--)
-        {
-            Destroy(transform.GetChild(i).gameObject);
-        }
-        //Debug.Log($"[PointBuild] Have Reset {name}");
-    }
+    
 
     #region ContextMenu Testing
     [ContextMenu("Test Build Saw Here (Costs Coins)")]
@@ -142,6 +134,16 @@ public class PointBuild : MonoBehaviour
     private void TestResetPointBuild()
     {
         ResetBuildPoint();
+    }
+    public void ResetBuildPoint() //Reset point build, tính nắng test
+    {
+        hasSaw = false;
+        //Detele child
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject);
+        }
+        //Debug.Log($"[PointBuild] Have Reset {name}");
     }
     #endregion
 }

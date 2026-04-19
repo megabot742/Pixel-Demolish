@@ -5,11 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class CoinManager : BaseManager<CoinManager>
 {
-    [SerializeField] private int maxCoins = 9999999; // Max coin
+    [SerializeField] private int maxCoins = 9999999; // Số coin tối đa
     [SerializeField] private string maxText = "Max Coin";
     public int currentCoins = 0;
     public int CurrentCoins => currentCoins;
-    private const int DISPLAY_DIGITS = 7; // Always display 7 digits
+    private const int DISPLAY_DIGITS = 7; // Giới hạn 7 chữ số
 
     #region Singleton Manager
     protected override void Awake()
@@ -35,17 +35,17 @@ public class CoinManager : BaseManager<CoinManager>
     #region Handle Coin
     public void AddCoin(int amount = 1)
     {
-        if (currentCoins >= maxCoins) return; //check max coin
+        if (currentCoins >= maxCoins) return; //Kiểm tra coin hiện tại
 
         currentCoins += amount;
-        if (currentCoins > maxCoins) //Cap coin for max
+        if (currentCoins > maxCoins) //Giới hạn coin ko vượt mức tối đa
             currentCoins = maxCoins;
         UpdateUI();
     }
     public void SubtractCoin(int amount)
     {
         currentCoins -= amount;
-        if (currentCoins < 0) currentCoins = 0;  //Cap for never negative
+        if (currentCoins < 0) currentCoins = 0;  //Kiểm tra để không rơi vào tình trạng coin bị âm
 
         UpdateUI();
     }
@@ -71,10 +71,6 @@ public class CoinManager : BaseManager<CoinManager>
         currentCoins = 0;
         UpdateUI();
     }
-    // void OnValidate()
-    // {
-    //     coinText.text = currentCoins.ToString();
-    // }
     #endregion
     #region ContextMenu
     [ContextMenu("Add 10 Coins (Testing)")]

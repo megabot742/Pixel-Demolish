@@ -13,6 +13,9 @@ public class UIManager : BaseManager<UIManager>
     [Header("Game")]
     public HUDPanel hUDPanel;
     public ResultPanel resultPanel;
+    [Header("Loading")]
+    public LoadingPanel loadingPanel;
+
     [Header("Scene")]
     public string currentSceneName;
 
@@ -27,25 +30,68 @@ public class UIManager : BaseManager<UIManager>
     }
     public void SwitchToScene(string sceneName)
     {
-        //Clear DotWeen
+        //Dọn các Animation Dotween
         DOTween.KillAll();
-        // Load the new scene
-        SceneManager.LoadScene(sceneName);
-        currentSceneName = sceneName;
+        if (resultPanel != null) resultPanel.gameObject.SetActive(false);
+        //Dọn Enity
+        Enity[] entities = FindObjectsByType<Enity>(FindObjectsSortMode.None);
+        foreach (var entity in entities)
+        {
+            if (entity != null)
+            {
+                entity.EntityCleanupAndDestroy();
+            }
+        }
+        //Dọn phần tử về Pool
+        if (PoolManager.HasInstance)
+        {
+            PoolManager.Instance.ResetAllPool();
+        }
+        //Loading
+        if (loadingPanel != null)
+        {
+            loadingPanel.ShowLoading(sceneName);   // ← dùng loading thay vì LoadScene trực tiếp
+        }
+        else // Fallback
+        {
+            SceneManager.LoadScene(sceneName);
+            currentSceneName = sceneName;
+            UpdateUIForScene(sceneName);
+        }
 
-        // Update UI based on the loaded scene
-        UpdateUIForScene(sceneName);
 
-       
     }
 
     public void RestartCurrentLevel()
     {
         if (!string.IsNullOrEmpty(currentSceneName))
         {
-            DOTween.KillAll();           
-            SceneManager.LoadScene(currentSceneName);
-            UpdateUIForScene(currentSceneName);
+            DOTween.KillAll(); //Dọn các Animation Dotween
+            if (resultPanel != null) resultPanel.gameObject.SetActive(false);
+            //Dọn Enity
+            Enity[] entities = FindObjectsByType<Enity>(FindObjectsSortMode.None);
+            foreach (var entity in entities)
+            {
+                if (entity != null)
+                {
+                    entity.EntityCleanupAndDestroy();
+                }
+            }
+            //Dọn phần tử về Pool
+            if (PoolManager.HasInstance)
+            {
+                PoolManager.Instance.ResetAllPool();
+            }
+            //Loading
+            if (loadingPanel != null)
+            {
+                loadingPanel.ShowLoading(currentSceneName);
+            }
+            else
+            {
+                SceneManager.LoadScene(currentSceneName);
+                UpdateUIForScene(currentSceneName);
+            }
         }
     }
 
@@ -60,16 +106,18 @@ public class UIManager : BaseManager<UIManager>
             activeObject.SetActive(true);
         }
     }
-    private void UpdateUIForScene(string sceneName)
+    public void UpdateUIForScene(string sceneName)
     {
-        // Disable all panels first
+        // Tắt hết các panel trước
         ChangeUIGameObject(homePanel.gameObject);
         ChangeUIGameObject(settingPanel.gameObject);
 
         ChangeUIGameObject(hUDPanel.gameObject);
         ChangeUIGameObject(resultPanel.gameObject);
 
-        // Enable the default panel based on the scene
+        ChangeUIGameObject(loadingPanel.gameObject);
+
+        // Hiện các panel phù hợp với scene
         switch (sceneName)
         {
             case "Menu":

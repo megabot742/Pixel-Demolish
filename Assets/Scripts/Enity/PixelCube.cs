@@ -6,40 +6,44 @@ public class PixelCube : MonoBehaviour
 {
     private bool detached; //default = false;
 
-    public int Id { get; set; }
-
-    [ContextMenu("Detouch Cube")]
+    public void ResetDetached() => detached = false; 
+    public int Id { get; set; } //ID cube
 
     public void DetouchCube()
     {
-        if (detached) return; //Check detached
-
-        detached = true;
-        Enity parentEntity = GetComponentInParent<Enity>();
+        if (detached) return; //Kiểm tra trạng thái tách hiện tại
+        detached = true; //Áp trạng thái để không còn bị gọi lại
+        
+        Enity parentEntity = GetComponentInParent<Enity>(); 
+        //Kiểm tra Enity cha
         if (parentEntity != null)
         {
-            parentEntity.DetouchCubeFromChild(this);
+            parentEntity.DetouchCubeFromEntity(this); //Xử lí tách
         }
-        GetComponent<ColorCube>().ApplyDetouchColor();
+        GetComponent<ColorCube>().ApplyDetouchColor(); //Áp lại màu sau tách (màu sau tách sẽ đậm hơn)
 
     }
     public void DestroyCube()
     {
-        DetouchCube();
+        DetouchCube(); //Gọi xử lí tách
 
-        GetComponent<Rigidbody>().isKinematic = true;
-        GetComponent<Collider>().enabled = false;
-        transform.DOScale(0, 0.5f).OnComplete(() =>
+        if (TryGetComponent<Rigidbody>(out var rb)) rb.isKinematic = true; //Bật lại isKinemetic, tránh lỗi va chạm khi đang trả về Pool
+        if (TryGetComponent<Collider2D>(out var col)) col.enabled = false; //Tắt Collider
+
+        //Animation Dotween phá hủy
+        var tween = transform.DOScale(0, 0.5f).OnComplete(() =>
         {
-            if (CoinManager.HasInstance) //Check coin
-            {
-                CoinManager.Instance.AddCoin(1); // +1 when 1 cube Destroy
-            }
-            if (ResultManager.HasInstance)
-            {
-                ResultManager.Instance.AddExp(1);
-            }
-            Destroy(gameObject);
+            if (this == null || gameObject == null) return;
+            
+            if (CoinManager.HasInstance) CoinManager.Instance.AddCoin(1);
+            if (ResultManager.HasInstance) ResultManager.Instance.AddExp(1);
+
+            //Check pool để gửi trả về
+            if (PoolManager.HasInstance)
+                PoolManager.Instance.ReturnToPool(gameObject);
+            else
+                Destroy(gameObject); //fall back
         });
+        
     }
 }

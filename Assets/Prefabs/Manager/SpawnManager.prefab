@@ -44,15 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bded40170edc544fb45ab4602565435, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entityPrefabs:
-  - {fileID: 8303225151387148797, guid: de73afd63f7e81b4e9434a15b62ba72f, type: 3}
-  - {fileID: 7808649183990228967, guid: ee01117f102ba244a9e58c5135f037a3, type: 3}
-  - {fileID: 4130353557617653429, guid: de534dabd8321eb41b8ba0c809a25d4e, type: 3}
-  - {fileID: 2342642185280357424, guid: dbce39f2bdededd4bbae1c4959f12c3e, type: 3}
-  - {fileID: 8513141824630705986, guid: f99e49483910b7842a2a37ca8d070e84, type: 3}
-  - {fileID: 1199721399923421304, guid: cbcfce70b6e79d94b87d5fc1ceb0a39f, type: 3}
-  - {fileID: 3958846170062156297, guid: a066218b2a55cd9499693044cb686777, type: 3}
+  entityDatabase: {fileID: 11400000, guid: a9a8925f56384ea4b88bd361b59a1c7d, type: 2}
   spawnCountDown: 7
   spawnPoint: {fileID: 0}
   randomRotationRange: 80
-  isSpawning: 1
+  canSpawn: 1

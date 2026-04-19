@@ -17,6 +17,31 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: d49503ba6446fca46b0d7a0ec07ae0d0
   m_SerializeEntries:
+  - m_GUID: 1afb4cb2abaa473408e8d63d2c9b0849
+    m_Address: Ship
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 33f67d4d2c338eb46a1f0373438a0147
+    m_Address: Diamond
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3533177a8bdc1d24fb6287952b7d4a64
+    m_Address: Apple
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 500a1c0c70f94294bbfd730eedbe4c93
+    m_Address: AmongUs
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 780b462f73a51b4429a20fafba8bce43
+    m_Address: Banana
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a9a8925f56384ea4b88bd361b59a1c7d
     m_Address: EntityDatabase.asset
     m_ReadOnly: 0
@@ -27,8 +52,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b9165d7a8f51f6244ba752885863f111
+    m_Address: Hamburger
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f1f40c72b736264439065f79a5c4c215
-    m_Address: Assets/Prefabs/Enity/Tool.asset
+    m_Address: Tool
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2ad031aa386bea4da1439d8efde6451
+    m_Address: Coin
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

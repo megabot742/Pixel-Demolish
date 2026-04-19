@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 5683314058216717703}
   - component: {fileID: 8310050117814647902}
-  - component: {fileID: 2262002082479267253}
   - component: {fileID: -3552840313644159704}
+  - component: {fileID: 6285729887774687790}
   m_Layer: 0
   m_Name: Saw
   m_TagString: Untagged
@@ -56,29 +56,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!136 &2262002082479267253
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 978336392405388357}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 2.5
-  m_Height: 10
-  m_Direction: 2
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &-3552840313644159704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,6 +68,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8efdb356f577ad4389a3023e849d535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!58 &6285729887774687790
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 978336392405388357}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 2.5
 --- !u!1 &2849999643645374109
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +114,7 @@ GameObject:
   - component: {fileID: 5946525600924871236}
   - component: {fileID: 7276512052854741804}
   - component: {fileID: 3660263861173548033}
-  - component: {fileID: 1292511067952167548}
+  - component: {fileID: 7986848890200496830}
   m_Layer: 0
   m_Name: CenterCylinder
   m_TagString: Untagged
@@ -175,13 +187,15 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1292511067952167548
-CapsuleCollider:
+--- !u!58 &7986848890200496830
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2849999643645374109}
+  m_Enabled: 1
+  m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -190,14 +204,24 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 10
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 1
 --- !u!1 &3984847280220220777
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,6 +413,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BladeSaw (8)
       objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -462,6 +491,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BladeSaw (10)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -537,6 +571,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BladeSaw (11)
       objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -610,6 +649,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BladeSaw (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -685,6 +729,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BladeSaw (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -758,6 +807,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BladeSaw
+      objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -833,6 +887,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BladeSaw (9)
       objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -906,6 +965,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BladeSaw (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -981,6 +1045,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BladeSaw (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1054,6 +1123,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BladeSaw (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1129,6 +1203,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BladeSaw (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1202,6 +1281,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BladeSaw (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4204728675115662536, guid: dd4cefb32ad27e049980811ffb260e50,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

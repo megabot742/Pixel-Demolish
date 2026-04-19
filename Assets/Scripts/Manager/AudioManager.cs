@@ -28,7 +28,7 @@ public class AudioManager : BaseManager<AudioManager>
         base.Awake();
         SceneManager.sceneLoaded += OnSceneLoaded;
 
-        // Force AudioSource is always ready
+        // Kiểm tra AudioSource
         if (musicSource != null)
         {
             musicSource.enabled = true;
@@ -51,7 +51,7 @@ public class AudioManager : BaseManager<AudioManager>
     {
         string currentScene = scene.name;
 
-        // Only play music if the scene changes (avoid loop)
+        // Chỉ phát nhạc nếu Scene thay đổi (nhạc có lập lại)
         if (currentScene != lastSceneName)
         {
             lastSceneName = currentScene;
@@ -59,7 +59,7 @@ public class AudioManager : BaseManager<AudioManager>
         }
     }
 
-    private void LoadSavedVolumes()
+    private void LoadSavedVolumes() //Load lại giá trị volume lưu trước đó từ PlayerPrefs
     {
         float musicVol = PlayerPrefs.GetFloat(MUSIC_VOLUME_KEY, 0.8f);
         float sfxVol   = PlayerPrefs.GetFloat(SFX_VOLUME_KEY, 0.8f);
@@ -67,7 +67,7 @@ public class AudioManager : BaseManager<AudioManager>
         SetMusicVolume(musicVol);
         SetSFXVolume(sfxVol);
     }
-    #region Handle
+    #region Handle set volume
     public void SetMusicVolume(float normalizedVolume)
     {
         PlayerPrefs.SetFloat(MUSIC_VOLUME_KEY, normalizedVolume);
@@ -102,7 +102,8 @@ public class AudioManager : BaseManager<AudioManager>
 
         PlayRandomTrack();
     }
-
+    #endregion
+    #region RandomTrack
     private void PlayRandomTrack()
     {
         if (musicSource == null || currentPlaylist == null || currentPlaylist.Length == 0)

@@ -7,8 +7,8 @@ using UnityEngine.SceneManagement;
 public class PlayerInteraction : MonoBehaviour
 {
     [Header("Click Settings")]
-    [SerializeField] private LayerMask pixelCubeLayer = ~0;   // Layer of PixelCube (default Everything)
-    [SerializeField] private float maxClickDistance = 100f;
+    [SerializeField] private LayerMask pixelCubeLayer = ~0;   // Layer của PixelCube (default Everything)
+    [SerializeField] private float maxClickDistance = 140f;
 
     private Camera currentCamera;
 
@@ -30,7 +30,7 @@ public class PlayerInteraction : MonoBehaviour
 
     private void FindCurrentCamera()
     {
-        currentCamera = Camera.main;
+        currentCamera = Camera.main; //Tìm CameraMain
 
         if (currentCamera == null)
             Debug.LogWarning("[PlayerInteraction] Main Camera not found in current scene!");
@@ -40,6 +40,7 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (currentCamera == null) return;
 
+        // Kiểm tra input (hỗ trợ cả Mouse + Touch)
         bool isTouch = Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began;
         bool isMouse = Input.GetMouseButtonDown(0);
 
@@ -47,6 +48,7 @@ public class PlayerInteraction : MonoBehaviour
 
         Vector3 inputPos = isMouse ? Input.mousePosition : Input.GetTouch(0).position;
 
+        // Bỏ qua nếu click vào UI
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
             return;  // vẫn giữ để an toàn
@@ -69,13 +71,15 @@ public class PlayerInteraction : MonoBehaviour
         }
 
         Ray ray = currentCamera.ScreenPointToRay(inputPos);
+        RaycastHit2D hit = Physics2D.GetRayIntersection(ray, maxClickDistance, pixelCubeLayer);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, maxClickDistance, pixelCubeLayer))
+        if (hit.collider != null)
         {
             if (hit.collider.TryGetComponent(out PixelCube pixelCube))
             {
                 pixelCube.DetouchCube();
                 pixelCube.transform.DOShakeScale(0.2f, 0.1f);
+                //Debug.Log($"Clicked PixelCube at world pos: {hit.point}");
             }
         }
     }

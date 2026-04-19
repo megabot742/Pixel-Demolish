@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class DisableOverTime : MonoBehaviour
 {
-    [SerializeField] public float timeToDisable;
+    private float timeToDisable;
+    public void SetTimeToDisable(float value)
+    {
+        timeToDisable = value;
+    }
     private float counterTime;
     void OnEnable()
     {

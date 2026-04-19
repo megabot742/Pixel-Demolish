@@ -5,60 +5,76 @@ using UnityEngine;
 public class SpawnZone : MonoBehaviour
 {
     [Header("Spawn Zone Settings")]
-    [SerializeField] private bool debugLog = false;   // Bật để xem log khi pause/resume
+    [SerializeField] private float requiredStayTime = 3f;
+    [SerializeField] private bool debugLog = false;
 
-    private int entityCount = 0;
-    private SpawnManager spawnManager;
+    [Header("Overlap Settings")]
+    [SerializeField] private Vector2 zoneSize = new Vector2(30f, 40f);   // Điều chỉnh kích thước vùng
+    [SerializeField] private LayerMask pixelCubeLayer = ~0;
 
-    private void Awake()
+    private float stayTimer = 0f;
+    private bool isBlocked = false;
+
+    private Collider2D[] results = new Collider2D[128]; // Cache để tránh alloc
+
+    private void FixedUpdate()   // Dùng FixedUpdate cho Physics
     {
-        if (SpawnManager.HasInstance)
+        if (ResultManager.HasInstance && ResultManager.Instance.GetLevelCompleted())
         {
-            spawnManager = SpawnManager.Instance;
+            SetSpawnState(false);
+            return;
+        }
+
+        // Kiểm tra có PixelCube nào trong vùng không
+        int count = Physics2D.OverlapBoxNonAlloc(transform.position, zoneSize, 0f, results, pixelCubeLayer);
+
+        bool hasPixelCube = count > 0;
+
+        if (hasPixelCube)
+        {
+            stayTimer += Time.fixedDeltaTime;
+
+            if (stayTimer >= requiredStayTime && !isBlocked)
+            {
+                SetSpawnState(false);
+                if (debugLog) Debug.LogWarning($"[SpawnZone] Blocked: {count} PixelCubes stayed too long");
+            }
         }
         else
         {
-            Debug.LogWarning("[SpawnZone] SpawnManager.Instance not found!");
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (spawnManager == null) return;
-        if (spawnManager.IsLevelCompleted()) return;
-
-        if (IsEntity(other))
-        {
-            entityCount++;
-            
-            if (entityCount == 1)
+            stayTimer = 0f;
+            if (isBlocked)
             {
-                spawnManager.SetCanSpawn(false);
-                if (debugLog) Debug.LogWarning("[SpawnZone] Zone occupied → Stop spawning");
+                SetSpawnState(true);
+                if (debugLog) Debug.LogWarning("[SpawnZone] Clear → RESUME spawning");
             }
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    private void SetSpawnState(bool canSpawn)
     {
-        if (spawnManager == null) return;
-        if (spawnManager.IsLevelCompleted()) return;
-
-        if (IsEntity(other))
+        if (SpawnManager.HasInstance && SpawnManager.Instance.GetCanSpawn() != canSpawn)
         {
-            if (entityCount > 0) entityCount--;
-
-            if (entityCount == 0)
-            {
-                spawnManager.SetCanSpawn(true);
-                if (debugLog) Debug.LogWarning("[SpawnZone] Zone clear → Resume spawning");
-            }
+            SpawnManager.Instance.SetCanSpawn(canSpawn);
+            isBlocked = !canSpawn;
         }
     }
 
-    // Bắt cả Enity (có nhiều cube con) lẫn PixelCube bị tách rời
-    private bool IsEntity(Collider other)
+    // Vẫn giữ để ResultManager gọi khi hoàn thành level
+    public void ForceReset()
     {
-        return other.GetComponentInParent<Enity>() != null;
+        stayTimer = 0f;
+        isBlocked = false;
+        if (SpawnManager.HasInstance)
+            SpawnManager.Instance.SetCanSpawn(true);
+
+        if (debugLog) Debug.LogWarning("[SpawnZone] Force reset");
+    }
+
+    // Debug visual trong Scene
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(transform.position, zoneSize);
     }
 }

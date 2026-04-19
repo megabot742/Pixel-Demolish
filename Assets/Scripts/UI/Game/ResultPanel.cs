@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ResultPanel : MonoBehaviour
 {
-    public void OnNextLevelClicked()
+    public void OnNextLevelClicked() //Button Action
     {
         if (ResultManager.HasInstance)
             ResultManager.Instance.NextLevel();

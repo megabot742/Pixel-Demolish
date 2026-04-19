@@ -13,11 +13,11 @@ public class SettingPanel : MonoBehaviour
     {
         if (AudioManager.HasInstance)
         {
-            // Load the saved value and assign it to the Slider
+            // Lấy giá trị đã lưu của SFX và Muisc dưới PlayerPrefs
             sfxSlider.value   = AudioManager.Instance.GetSFXVolume();
             musicSlider.value = AudioManager.Instance.GetMusicVolume();
 
-            // Assign event when dragging slider
+            // Gán sự kiện cho slider của SFX và Music
             sfxSlider.onValueChanged.AddListener(AudioManager.Instance.UpdateSFXVolumeFromSlider);
             musicSlider.onValueChanged.AddListener(AudioManager.Instance.UpdateMusicVolumeFromSlider);
         }

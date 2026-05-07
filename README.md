@@ -21,13 +21,13 @@ Casual Pixel Destruction game
   - PointBuild.cs: là script định danh nằm ở các gameobject PointBuild nằm rải rác ở từng level. giúp mỗi khi load scene thì buildManager.cs sẽ tự động bắt dc PointBuild đúng ở từng scene. Điều này giúp sinh ra Saw đúng vị trí, và bỏ các UI button sau khi build xong tại điểm PointBuild nào đấy
 
 - Liên quan đến quản lí: 
-  - UIManager: xủ lí UI ẩn hiện
-  - UIEventManager: xử lí event liên quan đến UI
-  - AudioManager: xử lí âm thanh, nhạc thông qua kiểm soát Audio Mixed và lưu bằng PlayerPrefs
-  - SpawnManager: xử lí spawn các Enity ở các màn chơi
-  - CoinManager: quản lí xu ở các màn chơi, tăng lên khi Gear phá hủy PixelCube, giảm khi xây dựng Saw
-  - Resualt: quản lí exp ở từng màng chơi, tăng lên khi Gear phá hủy PixelCube
+  - UIManager.cs: xủ lí UI ẩn hiện
+  - UIEventManager.cs: xử lí event liên quan đến UI
+  - AudioManager.cs: xử lí âm thanh, nhạc thông qua kiểm soát Audio Mixed và lưu bằng PlayerPrefs
+  - SpawnManager.cs: xử lí spawn các Enity ở các màn chơi
+  - CoinManager.cs: quản lí xu ở các màn chơi, tăng lên khi Gear phá hủy PixelCube, giảm khi xây dựng Saw
+  - ResualtManager.cs: quản lí exp ở từng màng chơi, tăng lên khi Gear phá hủy PixelCube
+  - PoolManager.cs: quản lí pool của các pixel cube để tạo Entity
 
 # Những cải thiện nếu có thêm thời gian
   - Thêm màn, thêm Enity
-  - Làm tool giúp tạo Enity nhanh hơn

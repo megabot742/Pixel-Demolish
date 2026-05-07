@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DisableOverTime : MonoBehaviour
 {
-    private float timeToDisable;
+    private float timeToDisable = 1;
     public void SetTimeToDisable(float value)
     {
         timeToDisable = value;
